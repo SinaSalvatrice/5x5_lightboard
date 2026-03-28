@@ -1,13 +1,14 @@
-name: Build 5x5 Lightboard default
+
+name: Build Ohropax_keyboard sina firmware
+
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
     paths:
       - "config.h"
       - "keyboard.json"
-      - "5x5_lightboard.c"
-      - "5x5_lightboard.h"
+      - "Ohropax_keyboard.c"
       - "rules.mk"
       - "keymaps/**"
       - ".github/workflows/build.yaml"
@@ -21,8 +22,8 @@ jobs:
       contents: read
 
     env:
-      KEYBOARD: 5x5_lightboard
-      KEYMAP: default
+      KEYBOARD: Ohropax_keyboard
+      KEYMAP: sina
       QMK_HOME: /tmp/qmk_firmware
 
     steps:
@@ -37,7 +38,10 @@ jobs:
           git -C "$QMK_HOME" submodule update --init --depth 1 lib/chibios lib/chibios-contrib lib/pico-sdk lib/printf lib/lufa
           qmk config user.qmk_home="$QMK_HOME"
 
-      - name: Inject keyboard sources
+      - name: Install ARM toolchain
+        run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi
+
+      - name: Copy keyboard into QMK tree
         run: |
           mkdir -p "$QMK_HOME/keyboards/$KEYBOARD"
           find "$QMK_HOME/keyboards/$KEYBOARD" -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
@@ -56,11 +60,11 @@ jobs:
           find "$QMK_HOME" -type f -name "${KEYBOARD}_${KEYMAP}.uf2" -exec cp {} "$GITHUB_WORKSPACE/artifacts/" \;
           test -f "$GITHUB_WORKSPACE/artifacts/${KEYBOARD}_${KEYMAP}.uf2"
 
-      - name: Upload firmware via
+      - name: Upload firmware Ohropax_keyboard_sina.uf2
         uses: actions/upload-artifact@v4
         with:
-          name: 5x5_lightboard_default_uf2
-          path: artifacts/5x5_lightboard_default.uf2
+          name: Ohropax_keyboard_sina_uf2
+          path: artifacts/Ohropax_keyboard_sina.uf2
           if-no-files-found: error
           compression-level: 6
           overwrite: false
